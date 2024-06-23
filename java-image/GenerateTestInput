@@ -1,0 +1,51 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Random;
+
+public class GenerateTestInput {
+    public static void main(String[] args) {
+        String fileName = "test_input.txt";
+        int numberOfLogs = 1000; // Number of log entries to generate
+        int numberOfQueries = 100; // Number of queries to generate
+
+        Random random = new Random();
+        String[] logTypes = {"INTERNAL_SERVER_ERROR", "BAD_REQUEST", "NOT_FOUND", "UNAUTHORIZED", "FORBIDDEN"};
+
+        try (FileWriter fileWriter = new FileWriter(fileName)) {
+            long baseTimestamp = System.currentTimeMillis();
+
+            // Generate log entries
+            for (int i = 0; i < numberOfLogs; i++) {
+                long timestamp = baseTimestamp + i;
+                String logType = logTypes[random.nextInt(logTypes.length)];
+                double severity = 1 + (100 * random.nextDouble());
+                fileWriter.write(String.format("1 %d;%s;%.2f%n", timestamp, logType, severity));
+            }
+
+            // Generate queries
+            for (int i = 0; i < numberOfQueries; i++) {
+                int queryType = 2 + random.nextInt(3); // Query types 2, 3, or 4
+                switch (queryType) {
+                    case 2:
+                        String logType = logTypes[random.nextInt(logTypes.length)];
+                        fileWriter.write(String.format("2 %s%n", logType));
+                        break;
+                    case 3:
+                        String timeCondition = random.nextBoolean() ? "BEFORE" : "AFTER";
+                        long timestamp = baseTimestamp + random.nextInt(numberOfLogs);
+                        fileWriter.write(String.format("3 %s %d%n", timeCondition, timestamp));
+                        break;
+                    case 4:
+                        timeCondition = random.nextBoolean() ? "BEFORE" : "AFTER";
+                        logType = logTypes[random.nextInt(logTypes.length)];
+                        timestamp = baseTimestamp + random.nextInt(numberOfLogs);
+                        fileWriter.write(String.format("4 %s %s %d%n", timeCondition, logType, timestamp));
+                        break;
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

@@ -1,0 +1,11 @@
+FROM openjdk:11-jre-slim
+
+WORKDIR /app
+
+COPY . /app
+
+RUN javac ErrorLogMonitoring.java
+
+RUN javac GenerateTestInput.java && java GenerateTestInput
+
+CMD ["java", "ErrorLog"]
